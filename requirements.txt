@@ -1,0 +1,12 @@
+# api
+fastapi
+uvicorn
+
+# data
+sqlalchemy
+object-store-python
+
+# audio
+midiutil
+pydub
+
