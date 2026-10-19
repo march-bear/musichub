@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.routes import tracks
 
-@app.get('/hello')
-def get_hello() -> str:
-    return 'Hello, world'
+app = FastAPI()
+app.include_router(tracks.router)

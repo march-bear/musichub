@@ -1,9 +1,8 @@
 *\~
 
-tmp
-
-__pycache__
-.venv
+__pycache__/
 .idea
+.venv/
 
-
+.env
+.tmp/
