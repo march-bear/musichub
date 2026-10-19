@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      dockerfile: fat.Dockerfile
+    command: uvicorn app.main:app --host ${API_HOST} --port ${API_PORT}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+
+  rustfs:
+    image: rustfs/rustfs:1.0.3-glibc
+    container_name: rustfs
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+    volumes:
+      - rustfs_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f localhost:9000/health/ready
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d  ${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  rustfs_data:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
