@@ -1,0 +1,5 @@
+#audio
+midiutil
+midi2audio
+pydub
+audioop-lts
