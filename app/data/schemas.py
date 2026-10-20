@@ -2,6 +2,7 @@ import enum
 
 from pydantic import BaseModel
 
+
 class Track(BaseModel):
     name: str
     payload: TrackPayload

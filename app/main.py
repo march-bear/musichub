@@ -5,9 +5,9 @@ from starlette.responses import JSONResponse
 
 from app.routes import tracks
 from app.util.exceptions import (
-    UserNotFoundException,
-    TrackNotFoundException,
     TrackAlreadyExistsException,
+    TrackNotFoundException,
+    UserNotFoundException,
 )
 
 app = FastAPI()

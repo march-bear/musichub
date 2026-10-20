@@ -1,15 +1,16 @@
-from sqlalchemy import select, delete, Sequence
+from sqlalchemy import Sequence, delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-import app.data.schemas as s
 import app.data.models as m
-from app.util.exceptions import TrackNotFoundException, TrackAlreadyExistsException
+import app.data.schemas as s
+from app.util.exceptions import TrackAlreadyExistsException, TrackNotFoundException
 
 
 class TrackService:
     def __init__(self, db: Session):
         self.db = db
+
 
     def get(self, user_id: int, track_name: str):
         stmt = select(m.Track).where(
@@ -24,6 +25,7 @@ class TrackService:
 
         return s.Track(name=track.name, payload=s.TrackPayload.model_validate(track.payload))
 
+
     def get_all(self, user_id: int):
         stmt = select(m.Track).where(
             m.Track.user_id == user_id,
@@ -37,6 +39,7 @@ class TrackService:
                 payload=s.TrackPayload.model_validate(track.payload)
             ) for track in tracks
         ]
+
 
     def create(self, user_id: int, track_name: str):
         payload = s.TrackPayload(tempo=120, parts=[])

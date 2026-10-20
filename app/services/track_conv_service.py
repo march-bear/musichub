@@ -4,6 +4,7 @@ from pydub import AudioSegment
 
 from app.data.schemas import Track
 
+
 class TrackConvService:
     def __init__(self, soundfont):
         self.fs = FluidSynth(soundfont)

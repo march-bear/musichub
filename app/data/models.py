@@ -1,13 +1,20 @@
 import enum
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
 from sqlalchemy import (
-    String, ForeignKey, UniqueConstraint, Enum, func,
+    Enum,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import (
-    DeclarativeBase, Mapped, mapped_column, relationship,
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
 )
 
 IntPk = Annotated[int, mapped_column(primary_key=True)]
@@ -63,9 +70,9 @@ class TrackConversion(Base):
     status: Mapped[ConversionStatus] = mapped_column(
         Enum(ConversionStatus), default=ConversionStatus.PENDING
     )
-    file_key: Mapped[Optional[str]]
-    error: Mapped[Optional[str]]
+    file_key: Mapped[str | None]
+    error: Mapped[str | None]
     created_at: Mapped[CreatedAt]
-    finished_at: Mapped[Optional[datetime]]
+    finished_at: Mapped[datetime | None]
 
     track: Mapped["Track"] = relationship(back_populates="conversions")

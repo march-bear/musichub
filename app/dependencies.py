@@ -1,14 +1,13 @@
-from typing import Iterator
+from collections.abc import Iterator
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app.services.track_service import TrackService
-from app.services.track_saver_service import TrackSaverService
-
 from app.data.database import SessionLocal
-from app.settings import settings
 from app.services.track_conv_service import TrackConvService
+from app.services.track_saver_service import TrackSaverService
+from app.services.track_service import TrackService
+from app.settings import settings
 
 
 def get_db() -> Iterator[Session]:

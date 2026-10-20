@@ -3,9 +3,9 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from app.data import schemas
-from app.dependencies import get_track_service, get_track_saver_service
-from app.services.track_service import TrackService
+from app.dependencies import get_track_saver_service, get_track_service
 from app.services.track_saver_service import TrackSaverService
+from app.services.track_service import TrackService
 
 router = APIRouter(prefix="/tracks", tags=["tracks"])
 
@@ -42,7 +42,11 @@ def get_track_preview(
 
 
 @router.get("/{name}/download/{fmt}")
-def download_track(name: str, user_id: int, fmt: str):
+def download_track(
+        name: str,
+        user_id: int,
+        fmt: str
+):
     pass
 
 
@@ -84,7 +88,11 @@ def delete_track(
     return track_service.delete(user_id, name)
 
 
-@router.post("/{name}/generate-audio", response_model=None)
+@router.post(
+    "/{name}/generate-audio",
+    response_model=None,
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 def generate_audio_track(
         name: str,
         user_id: int,
