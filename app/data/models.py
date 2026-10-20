@@ -40,12 +40,13 @@ class Track(Base):
     id: Mapped[IntPk]
     user_id: Mapped[int]
     name: Mapped[str] = mapped_column(String(100))
-    payload: Mapped[Optional[dict]] = mapped_column(JSONB)
+    payload: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[CreatedAt]
 
     conversions: Mapped[list["TrackConversion"]] = relationship(
         back_populates="track", cascade="all, delete-orphan"
     )
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_track_name"),)
 
 
 class TrackConversion(Base):

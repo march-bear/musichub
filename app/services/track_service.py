@@ -22,7 +22,7 @@ class TrackService:
         if track is None:
             raise TrackNotFoundException()
 
-        return s.Track.model_validate(track)
+        return s.Track(name=track.name, payload=s.TrackPayload.model_validate(track.payload))
 
     def get_all(self, user_id: int):
         stmt = select(m.Track).where(
@@ -31,10 +31,16 @@ class TrackService:
 
         tracks: Sequence[m.Track] = self.db.scalars(stmt).all()
 
-        return [s.Track.model_validate(track) for track in tracks]
+        return [
+            s.Track(
+                name=track.name,
+                payload=s.TrackPayload.model_validate(track.payload)
+            ) for track in tracks
+        ]
 
     def create(self, user_id: int, track_name: str):
-        db_track = m.Track(user_id=user_id, name=track_name)
+        payload = s.TrackPayload(tempo=120, parts=[])
+        db_track = m.Track(user_id=user_id, name=track_name, payload=payload.model_dump())
         self.db.add(db_track)
         try:
             self.db.commit()
@@ -42,7 +48,7 @@ class TrackService:
             self.db.rollback()
             raise TrackAlreadyExistsException()
 
-        return s.Track(name=db_track.name, payload=None)
+        return s.Track(name=db_track.name, payload=payload)
 
 
     def put(self, user_id: int, track: s.Track) -> s.Track:
@@ -59,7 +65,7 @@ class TrackService:
         if db_track is None:
             raise TrackNotFoundException()
 
-        db_track.payload = track.payload.model_dump(mode="json") if track.payload is not None else None
+        db_track.payload = track.payload.model_dump(mode="json")
         self.db.commit()
 
         return track
@@ -84,4 +90,4 @@ class TrackService:
         if row is None:
             raise TrackNotFoundException()
 
-        return s.Track(name=row.name, payload=None)
+        return s.Track(name=row.name, payload=s.TrackPayload(tempo=120, parts=list()))
