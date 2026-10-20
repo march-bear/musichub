@@ -28,9 +28,9 @@ class Base(DeclarativeBase):
 
 
 class AudioFormat(enum.Enum):
-    MIDI = "midi"
+    MIDI = "mid"
     MP3 = "mp3"
-    PREVIEW_MP3 = "preview_mp3"
+    PREVIEW_MP3 = "preview.mp3"
     WAV = "wav"
 
 

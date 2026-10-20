@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends
+from pathlib import Path
 from starlette import status
 from starlette.responses import JSONResponse
 
 from app.data import schemas
-from app.dependencies import get_track_saver_service, get_track_service
+from app.data.models import AudioFormat
+from app.dependencies import get_storage_service, get_track_saver_service, get_track_service
 from app.services.track_saver_service import TrackSaverService
 from app.services.track_service import TrackService
+from app.services.storage_service import StorageService
+
 
 router = APIRouter(prefix="/tracks", tags=["tracks"])
 
@@ -33,21 +37,29 @@ def get_track(
     return track_service.get(user_id, name)
 
 
-@router.get("/{name}/preview")
+@router.get("/{name}/preview", response_model=schemas.TrackURL)
 def get_track_preview(
         name: str,
         user_id: int,
+        storage_service: StorageService = Depends(get_storage_service)
 ):
-    return
+    return schemas.TrackURL(
+        name=name,
+        url=storage_service.get_file_url(str(Path(str(user_id)) / f"{name}.preview.mp3"))
+    )
 
 
 @router.get("/{name}/download/{fmt}")
 def download_track(
         name: str,
         user_id: int,
-        fmt: str
+        fmt: AudioFormat,
+        storage_service: StorageService = Depends(get_storage_service)
 ):
-    pass
+    return schemas.TrackURL(
+        name=name,
+        url=storage_service.get_file_url(str(Path(str(user_id)) / f"{name}.{fmt.value}"))
+    )
 
 
 @router.post("/", response_model=schemas.Track, status_code=status.HTTP_201_CREATED)

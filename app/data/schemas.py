@@ -36,3 +36,7 @@ def _note_name(n: int) -> str:
 MIDINote = enum.IntEnum("MIDINote", {_note_name(n): n for n in range(128)})
 
 # < MIDINote
+
+class TrackURL(BaseModel):
+    name: str
+    url: str

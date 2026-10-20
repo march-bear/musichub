@@ -7,6 +7,11 @@ services:
       - "${API_PORT}:${API_PORT}"
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      OBJECT_STORAGE_HOST: ${OBJECT_STORAGE_HOST}
+      OBJECT_STORAGE_PORT: ${OBJECT_STORAGE_PORT}
+      OBJECT_STORAGE_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY}
+      OBJECT_STORAGE_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY}
+      OBJECT_STORAGE_PUBLIC_URL: ${OBJECT_STORAGE_PUBLIC_URL}
       EXPIRES_IN_TIME: ${EXPIRES_IN_TIME}
       SOUNDFONT: ${SOUNDFONT}
     networks:
@@ -33,6 +38,8 @@ services:
     volumes:
       - rustfs_data:/data
     restart: unless-stopped
+    networks:
+      - app-network
     healthcheck:
       test: curl -f localhost:9000/health/ready
       interval: 3s
