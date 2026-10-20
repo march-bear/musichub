@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 class Track(BaseModel):
     name: str
-    payload: TrackPayload
+    payload: TrackPayload | None
 
 
 class TrackPayload(BaseModel):
