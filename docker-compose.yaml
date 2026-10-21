@@ -1,0 +1,76 @@
+services:
+  api:
+    build:
+      dockerfile: fat.Dockerfile
+    env_file: .env
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    command: uvicorn app.main:app --host ${API_HOST} --port ${API_PORT}
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  rustfs:
+    image: rustfs/rustfs:1.0.3-glibc
+    container_name: rustfs
+    environment:
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: ":${RUSTFS_PORT}"
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+    ports:
+      - "${RUSTFS_PORT}:${RUSTFS_PORT}"
+    volumes:
+      - rustfs_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: curl -f localhost:${RUSTFS_PORT}/health/ready
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d  ${POSTGRES_DB}
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build:
+      dockerfile: thin.Dockerfile
+    env_file: .env
+    command: alembic upgrade head
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+volumes:
+  rustfs_data:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

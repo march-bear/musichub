@@ -1,9 +1,13 @@
+# emacs
 *\~
+\#*\#
 
-tmp
-
-__pycache__
-.venv
+# JetBrains
+__pycache__/
 .idea
+.venv/
 
-
+# other
+*.todo
+.env
+.tmp/

@@ -1,12 +1,15 @@
 # api
 fastapi
 uvicorn
+pydantic
+starlette
 
 # data
 sqlalchemy
-object-store-python
+boto3
+botocore
+psycopg[binary]
 
-# audio
-midiutil
-pydub
-
+# util
+pydantic-settings
+alembic
