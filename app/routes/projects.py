@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Depends
 from pathlib import Path
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 from starlette import status
 from starlette.responses import JSONResponse
 
 from app.data import schemas
 from app.data.models import AudioFormat
-from app.dependencies import get_storage_service, get_project_saver_service, get_project_service
+from app.dependencies import get_project_saver_service, get_project_service, get_storage_service
 from app.services.project_saver_service import ProjectSaverService
 from app.services.project_service import ProjectService
 from app.services.storage_service import StorageService
-
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/projects", tags=["projects"])
     status_code=status.HTTP_200_OK)
 def get_projects(
         user_id: int,
-        project_service: ProjectService = Depends(get_project_service)
+        project_service: Annotated[ProjectService, Depends(get_project_service)]
 ):
     projects = project_service.get_all(user_id)
     if len(projects) == 0:
@@ -32,7 +33,7 @@ def get_projects(
 def get_project(
         name: str,
         user_id: int,
-        project_service: ProjectService = Depends(get_project_service)
+        project_service: Annotated[ProjectService, Depends(get_project_service)]
 ):
     return project_service.get(user_id, name)
 
@@ -41,7 +42,7 @@ def get_project(
 def get_project_preview(
         name: str,
         user_id: int,
-        storage_service: StorageService = Depends(get_storage_service)
+        storage_service: Annotated[StorageService, Depends(get_storage_service)]
 ):
     return schemas.ProjectURL(
         name=name,
@@ -54,7 +55,7 @@ def download_project(
         name: str,
         user_id: int,
         fmt: AudioFormat,
-        storage_service: StorageService = Depends(get_storage_service)
+        storage_service: Annotated[StorageService, Depends(get_storage_service)]
 ):
     return schemas.ProjectURL(
         name=name,
@@ -66,7 +67,7 @@ def download_project(
 def create_project(
         name: str,
         user_id: int,
-        project_service: ProjectService = Depends(get_project_service)
+        project_service: Annotated[ProjectService, Depends(get_project_service)]
 ):
     return project_service.create(user_id, name)
 
@@ -75,10 +76,10 @@ def create_project(
 def complete_project(
         name: str,
         user_id: int,
-        project_payload: schemas.ProjectPayload,
-        project_service: ProjectService = Depends(get_project_service),
+        new_name: str,
+        project_service: Annotated[ProjectService, Depends(get_project_service)],
 ):
-    return project_service.patch(user_id, schemas.Project(name=name, payload=project_payload))
+    return project_service.patch(user_id, name, new_name)
 
 
 @router.put("/{name}", response_model=schemas.Project)
@@ -86,7 +87,7 @@ def update_project(
         name: str,
         user_id: int,
         project_payload: schemas.ProjectPayload,
-        project_service: ProjectService = Depends(get_project_service),
+        project_service: Annotated[ProjectService, Depends(get_project_service)],
 ):
     return project_service.put(user_id, schemas.Project(name=name, payload=project_payload))
 
@@ -95,7 +96,7 @@ def update_project(
 def delete_project(
         name: str,
         user_id: int,
-        project_service: ProjectService = Depends(get_project_service),
+        project_service: Annotated[ProjectService, Depends(get_project_service)],
 ):
     return project_service.delete(user_id, name)
 
@@ -108,6 +109,6 @@ def delete_project(
 def generate_audio_by_project(
         name: str,
         user_id: int,
-        project_saver_service: ProjectSaverService = Depends(get_project_saver_service)
+        project_saver_service: Annotated[ProjectSaverService, Depends(get_project_saver_service)]
 ):
     project_saver_service.save_project(user_id, name)

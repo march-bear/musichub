@@ -50,7 +50,7 @@ class Project(Base):
     payload: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[CreatedAt]
 
-    conversions: Mapped[list["ProjectConversion"]] = relationship(
+    conversions: Mapped[list[ProjectConversion]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
     __table_args__ = (UniqueConstraint("user_id", "name", name="uq_project_name"),)
@@ -75,4 +75,4 @@ class ProjectConversion(Base):
     created_at: Mapped[CreatedAt]
     finished_at: Mapped[datetime | None]
 
-    project: Mapped["Project"] = relationship(back_populates="conversions")
+    project: Mapped[Project] = relationship(back_populates="conversions")
