@@ -1,4 +1,4 @@
-from sqlalchemy import Sequence, delete, select
+from sqlalchemy import Sequence, delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -47,9 +47,9 @@ class ProjectService:
         self.db.add(db_project)
         try:
             self.db.commit()
-        except IntegrityError:
+        except IntegrityError as err:
             self.db.rollback()
-            raise ProjectAlreadyExistsException()
+            raise ProjectAlreadyExistsException() from err
 
         return s.Project(name=db_project.name, payload=payload)
 
@@ -74,8 +74,28 @@ class ProjectService:
         return project
 
 
-    def patch(self, user_id: int, project: s.Project) -> s.Project:
-        return self.put(user_id, project)
+    def patch(self, user_id: int, old_name: str, new_name: str) -> s.Project:
+        stmt = (
+            update(m.Project)
+            .where(
+                m.Project.user_id == user_id,
+                m.Project.name == old_name,
+            )
+            .values(name=new_name)
+            .returning(m.Project.name, m.Project.payload)
+        )
+
+        try:
+            row = self.db.execute(stmt).one_or_none()
+            self.db.commit()
+            if row is None:
+                self.db.rollback()
+                raise ProjectNotFoundException()
+        except IntegrityError as err:
+            self.db.rollback()
+            raise ProjectAlreadyExistsException() from err
+
+        return s.Project(name=row.name, payload=s.ProjectPayload.model_validate(row.payload))
 
 
     def delete(self, user_id: int, project_name: str) -> s.Project:
@@ -93,4 +113,4 @@ class ProjectService:
         if row is None:
             raise ProjectNotFoundException()
 
-        return s.Project(name=row.name, payload=s.ProjectPayload(tempo=120, parts=list()))
+        return s.Project(name=row.name, payload=s.ProjectPayload(tempo=120, parts=[]))
