@@ -3,17 +3,17 @@ import enum
 from pydantic import BaseModel
 
 
-class Track(BaseModel):
+class Project(BaseModel):
     name: str
-    payload: TrackPayload
+    payload: ProjectPayload
 
 
-class TrackPayload(BaseModel):
+class ProjectPayload(BaseModel):
     tempo: int
-    parts: list[TrackPart]
+    parts: list[ProjectPart]
 
 
-class TrackPart(BaseModel):
+class ProjectPart(BaseModel):
     instrument: int
     part: list[Note]
 
@@ -37,6 +37,6 @@ MIDINote = enum.IntEnum("MIDINote", {_note_name(n): n for n in range(128)})
 
 # < MIDINote
 
-class TrackURL(BaseModel):
+class ProjectURL(BaseModel):
     name: str
     url: str

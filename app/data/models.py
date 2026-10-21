@@ -41,8 +41,8 @@ class ConversionStatus(enum.Enum):
     FAILED = "failed"
 
 
-class Track(Base):
-    __tablename__ = "tracks"
+class Project(Base):
+    __tablename__ = "projects"
 
     id: Mapped[IntPk]
     user_id: Mapped[int]
@@ -50,21 +50,21 @@ class Track(Base):
     payload: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[CreatedAt]
 
-    conversions: Mapped[list["TrackConversion"]] = relationship(
-        back_populates="track", cascade="all, delete-orphan"
+    conversions: Mapped[list["ProjectConversion"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
     )
-    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_track_name"),)
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_project_name"),)
 
 
-class TrackConversion(Base):
-    __tablename__ = "track_conversions"
+class ProjectConversion(Base):
+    __tablename__ = "project_conversions"
     __table_args__ = (
-        UniqueConstraint("track_id", "format", name="uq_track_format"),
+        UniqueConstraint("project_id", "format", name="uq_project_format"),
     )
 
     id: Mapped[IntPk]
-    track_id: Mapped[int] = mapped_column(
-        ForeignKey("tracks.id", ondelete="CASCADE"), index=True
+    project_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), index=True
     )
     format: Mapped[AudioFormat] = mapped_column(Enum(AudioFormat))
     status: Mapped[ConversionStatus] = mapped_column(
@@ -75,4 +75,4 @@ class TrackConversion(Base):
     created_at: Mapped[CreatedAt]
     finished_at: Mapped[datetime | None]
 
-    track: Mapped["Track"] = relationship(back_populates="conversions")
+    project: Mapped["Project"] = relationship(back_populates="conversions")

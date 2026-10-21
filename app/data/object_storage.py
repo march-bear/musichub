@@ -22,10 +22,10 @@ s3_public = boto3.client(
     config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
 )
 
-TRACKS_BUCKET = "tracks"
+PROJECTS_BUCKET = "projects"
 SOUNDS_BUCKET = "sounds"
 
-buckets = [TRACKS_BUCKET, SOUNDS_BUCKET]
+buckets = [PROJECTS_BUCKET, SOUNDS_BUCKET]
 
 for bucket in buckets:
     try:

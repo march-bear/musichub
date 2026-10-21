@@ -1,8 +1,8 @@
 class UserNotFoundException(Exception):
     pass
 
-class TrackNotFoundException(Exception):
+class ProjectNotFoundException(Exception):
     pass
 
-class TrackAlreadyExistsException(Exception):
+class ProjectAlreadyExistsException(Exception):
     pass
