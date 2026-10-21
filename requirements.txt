@@ -12,3 +12,4 @@ psycopg[binary]
 
 # util
 pydantic-settings
+alembic
