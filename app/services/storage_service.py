@@ -17,5 +17,5 @@ class StorageService:
                 "Key" : key,
                 "Bucket": PROJECTS_BUCKET,
             },
-            ExpiresIn=settings.EXPIRES_IN_TIME,
+            ExpiresIn=settings.RUSTFS_URL_EXPIRES_IN_TIME,
         )

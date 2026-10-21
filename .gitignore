@@ -1,8 +1,13 @@
+# emacs
 *\~
+\#*\#
 
+# JetBrains
 __pycache__/
 .idea
 .venv/
 
+# other
+*.todo
 .env
 .tmp/
