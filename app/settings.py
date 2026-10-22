@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     RUSTFS_PUBLIC_URL: str
     RUSTFS_URL_EXPIRES_IN_TIME: int
 
+    MIGRATIONS_ENABLED: bool = False
+
     @field_validator("APP_EMAIL_SECRET_KEY", mode="before")
     @classmethod
     def hex_to_bytes(cls, v):
