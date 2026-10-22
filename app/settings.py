@@ -1,4 +1,4 @@
-from pydantic import Field, SecretBytes, field_validator
+from pydantic import Field, SecretBytes, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     )
 
     APP_EMAIL_SECRET_KEY: SecretBytes = Field(validation_alias="email_key")
+    APP_JWT_SECRET_KEY: SecretStr
+    APP_JWT_EXPIRES_IN_TIME: int
     APP_SOUNDFONT: str
 
     DATABASE_URL: str

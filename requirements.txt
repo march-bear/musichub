@@ -17,3 +17,5 @@ alembic
 # security
 bcrypt
 cryptography
+pyjwt
+pydantic[email]

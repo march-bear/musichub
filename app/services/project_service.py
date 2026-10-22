@@ -1,3 +1,4 @@
+from psycopg.errors import UniqueViolation
 from sqlalchemy import Sequence, delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -49,7 +50,10 @@ class ProjectService:
             self.db.commit()
         except IntegrityError as err:
             self.db.rollback()
-            raise ProjectAlreadyExistsException() from err
+            orig = err.orig
+            if isinstance(orig, UniqueViolation) and orig.diag.constraint_name == "uq_project_name":
+                raise ProjectAlreadyExistsException() from err
+            raise
 
         return s.Project(name=db_project.name, payload=payload)
 
@@ -93,7 +97,10 @@ class ProjectService:
                 raise ProjectNotFoundException()
         except IntegrityError as err:
             self.db.rollback()
-            raise ProjectAlreadyExistsException() from err
+            orig = err.orig
+            if isinstance(orig, UniqueViolation) and orig.diag.constraint_name == "uq_project_name":
+                raise ProjectAlreadyExistsException() from err
+            raise
 
         return s.Project(name=row.name, payload=s.ProjectPayload.model_validate(row.payload))
 
