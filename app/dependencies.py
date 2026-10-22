@@ -25,7 +25,7 @@ def get_project_service(db: Annotated[Session, Depends(get_db)]):
     return ProjectService(db)
 
 
-def get_project_conv_service(soundfont: str = settings.SOUNDFONT):
+def get_project_conv_service(soundfont: str = settings.APP_SOUNDFONT):
     return ProjectConvService(soundfont)
 
 

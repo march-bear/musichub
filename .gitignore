@@ -7,7 +7,10 @@ __pycache__/
 .idea
 .venv/
 
+# app
+.env
+secrets/
+
 # other
 *.todo
-.env
 .tmp/

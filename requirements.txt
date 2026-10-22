@@ -13,3 +13,7 @@ psycopg[binary]
 # util
 pydantic-settings
 alembic
+
+# security
+bcrypt
+cryptography
