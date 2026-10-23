@@ -8,6 +8,9 @@ class Settings(BaseSettings):
         secrets_dir="/run/secrets",
     )
 
+    APP_API_PUBLIC_HOST: str
+    APP_API_PUBLIC_PORT: int
+
     APP_EMAIL_SECRET_KEY: SecretBytes = Field(validation_alias="email_key")
     APP_JWT_SECRET_KEY: SecretStr
     APP_JWT_EXPIRES_IN_TIME: int

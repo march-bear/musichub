@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette import status
 
-from app.data.schemas import EmailConfirmTokenOut, LoginForm, RegisterForm, TokenOut
-from app.dependencies import get_auth_service
+from app.data.schemas import LoginForm, RegisterForm, TokenOut
+from app.dependencies import get_auth_service, get_email_service
 from app.services.auth_service import AuthService
+from app.services.email_service import EmailService
 from app.settings import settings
 from app.util.exceptions import BadCredentialsException
 
@@ -32,10 +33,11 @@ if settings.EMAIL_CHECK_ENABLED:
         email_confirmation_service.confirm(token)
 
 
-    @router.post("/register", response_model=EmailConfirmTokenOut)
+    @router.post("/register", status_code=status.HTTP_204_NO_CONTENT)
     def register(
             form: RegisterForm,
             auth_service: Annotated[AuthService, Depends(get_auth_service)],
+            email_service: Annotated[EmailService, Depends(get_email_service)],
             email_confirm_service: Annotated[EmailConfirmationService, Depends(get_email_confirmation_service)],
     ):
         if form.password != form.password_confirm:
@@ -43,7 +45,8 @@ if settings.EMAIL_CHECK_ENABLED:
 
         user_id, _ = auth_service.register(form.email, form.password)
 
-        return email_confirm_service.create_token(user_id)
+        token = email_confirm_service.create_token(user_id)
+        email_service.send_token_to_email(form.email, token.confirm_token)
 else:
     @router.post("/register", response_model=TokenOut)
     def register(

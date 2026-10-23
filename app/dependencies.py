@@ -9,6 +9,7 @@ from app.data import schemas
 from app.data.database import SessionLocal
 from app.data.object_storage import s3, s3_public
 from app.services.auth_service import AuthService
+from app.services.email_service import EmailService
 from app.services.project_conv_service import ProjectConvService
 from app.services.project_saver_service import ProjectSaverService
 from app.services.project_service import ProjectService
@@ -91,3 +92,7 @@ def get_email_confirmation_service(
     if settings.EMAIL_CHECK_ENABLED:
         return EmailConfirmationService(db, security_service, user_service)
     return None
+
+
+def get_email_service():
+    return EmailService()
