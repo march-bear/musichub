@@ -17,18 +17,16 @@ class UserService:
 
     def get_by_credentials(self, email: EmailStr, password: str):
         email_cipher = self.security_service.encrypt_email(email)
-        password_hash = self.security_service.hash_password(password)
 
         stmt = (
             select(m.User)
             .where(
                 m.User.email_cipher == email_cipher,
-                m.User.password_hash == password_hash,
             )
         )
 
         user: m.User | None = self.db.execute(stmt).scalars().one_or_none()
-        if user is None:
+        if user is None or not self.security_service.verify_password(password, user.password_hash):
             raise BadCredentialsException()
 
         return s.User(id=user.id, email=email, banned=user.banned)

@@ -10,7 +10,7 @@ from app.util.exceptions import UserBannedException
 
 
 class AuthService:
-    BEARER_TOKEN_TYPE = "Bearer"
+    BEARER_TOKEN_TYPE = "Bearer" # noqa: S105
 
     def __init__(self, user_service: UserService):
         self.user_service = user_service

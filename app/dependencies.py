@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from typing import Annotated
 
 from fastapi import Depends, Security
-from fastapi.security import HTTPBearer, OAuth2PasswordBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.data import schemas
