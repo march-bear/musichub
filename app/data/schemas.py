@@ -1,6 +1,32 @@
 import enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class EmailConfirmTokenOut(BaseModel):
+    confirm_token: str
+
+
+class User(BaseModel):
+    id: int
+    email: EmailStr
+    banned: bool
+
+
+class LoginForm(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class RegisterForm(BaseModel):
+    email: EmailStr
+    password: str
+    password_confirm: str
 
 
 class Project(BaseModel):

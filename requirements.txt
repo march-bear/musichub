@@ -13,3 +13,13 @@ psycopg[binary]
 # util
 pydantic-settings
 alembic
+
+# email
+itsdangerous
+aiosmtplib
+
+# security
+bcrypt
+cryptography
+pyjwt
+pydantic[email]
