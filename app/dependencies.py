@@ -16,8 +16,10 @@ from app.services.security_service import SecurityService
 from app.services.storage_service import StorageService
 from app.services.user_service import UserService
 from app.settings import settings
-from app.util.exceptions import UserBannedException
+from app.util.exceptions import EmailNotConfirmedException, UserBannedException
 
+if settings.EMAIL_CHECK_ENABLED:
+    from app.services.auth_service import AuthService, EmailConfirmationService
 
 def get_db() -> Iterator[Session]:
     db = SessionLocal()
@@ -58,19 +60,34 @@ def get_user_service(
     return UserService(db, security_service)
 
 
-def get_auth_service(user_service: Annotated[UserService, Depends(get_user_service)]):
-    return AuthService(user_service)
+def get_auth_service(
+        user_service: Annotated[UserService, Depends(get_user_service)],
+        email_confirmation_service: Annotated[EmailConfirmationService, Depends(get_email_confirmation_service)],
+):
+    return AuthService(user_service, email_confirmation_service)
 
 
 bearer_scheme = HTTPBearer()
 
 def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Security(bearer_scheme)],
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        credentials: Annotated[HTTPAuthorizationCredentials, Security(bearer_scheme)],
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> schemas.User:
     token = credentials.credentials
     user = auth_service.extract_token(token)
     if user.banned:
         raise UserBannedException()
+    if settings.EMAIL_CHECK_ENABLED and not user.confirmed:
+        raise EmailNotConfirmedException()
 
     return user
+
+
+def get_email_confirmation_service(
+        db: Annotated[Session, Depends(get_db)],
+        user_service: Annotated[UserService, Depends(get_user_service)],
+        security_service: Annotated[SecurityService, Depends(get_security_service)]
+):
+    if settings.EMAIL_CHECK_ENABLED:
+        return EmailConfirmationService(db, security_service, user_service)
+    return None

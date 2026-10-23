@@ -46,6 +46,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole))
     banned: Mapped[bool] = mapped_column(default=False)
     password_hash: Mapped[str]
+    email_confirmed: Mapped[bool] = mapped_column(default=False)
 
 
 class Project(Base):
@@ -58,3 +59,12 @@ class Project(Base):
     created_at: Mapped[CreatedAt]
 
     __table_args__ = (UniqueConstraint("user_id", "name", name="uq_project_name"),)
+
+
+class EmailConfirmation(Base):
+    __tablename__ = "email_confirmations"
+
+    id: Mapped[IntPk]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    token_cipher: Mapped[bytes] = mapped_column(unique=True)
+    created_at: Mapped[CreatedAt]

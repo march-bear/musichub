@@ -8,6 +8,8 @@ from app.routes import auth, projects
 from app.util.exceptions import (
     BadCredentialsException,
     EmailAlreadyBusyException,
+    EmailNotConfirmedException,
+    InvalidConfirmationTokenException,
     ProjectAlreadyExistsException,
     ProjectNotFoundException,
     UserBannedException,
@@ -45,3 +47,11 @@ def handle_email_already_busy(request: Request, exc: EmailAlreadyBusyException):
 @app.exception_handler(ExpiredSignatureError)
 def handle_expired_signature_exception(request: Request, exc: ExpiredSignatureError):
     return JSONResponse(status_code=401, content={"detail": "Expired token signature"})
+
+@app.exception_handler(InvalidConfirmationTokenException)
+def handle_invalid_confirmation_token_exception(request: Request, exc: InvalidConfirmationTokenException):
+    return JSONResponse(status_code=401, content={"detail": "Invalid confirmation token"})
+
+@app.exception_handler(EmailNotConfirmedException)
+def handle_email_not_confirmed_exception(request: Request, exc: EmailNotConfirmedException):
+    return JSONResponse(status_code=401, content={"detail": "Email not confirmed"})

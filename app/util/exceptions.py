@@ -15,3 +15,9 @@ class UserBannedException(Exception):
 
 class BadCredentialsException(Exception):
     pass
+
+class InvalidConfirmationTokenException(Exception):
+    pass
+
+class EmailNotConfirmedException(Exception):
+    pass

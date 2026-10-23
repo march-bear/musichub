@@ -8,6 +8,10 @@ class TokenOut(BaseModel):
     token_type: str
 
 
+class EmailConfirmTokenOut(BaseModel):
+    confirm_token: str
+
+
 class User(BaseModel):
     id: int
     email: EmailStr
