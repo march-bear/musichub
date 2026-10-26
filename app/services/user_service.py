@@ -1,96 +1,76 @@
 from pydantic import EmailStr
-from sqlalchemy import select, update
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import app.data.models as m
 import app.data.schemas as s
-from app.services.security_service import SecurityService
-from app.settings import settings
+from app.repositories.user_repository import UserRepository
+from app.security.fields.email import EmailEncryptor
+from app.security.passwords.hasher import PasswordHasher
 from app.util.exceptions import (
     BadCredentialsException,
-    EmailAlreadyBusyException,
-    EmailNotConfirmedException,
-    UserBannedException,
-    UserNotFoundException,
+    NotFoundException,
 )
 
 
 class UserService:
-    def __init__(self, db: Session, security_service: SecurityService):
+    def __init__(
+            self,
+            db: Session,
+            password_hasher: PasswordHasher,
+            email_encryptor: EmailEncryptor,
+            user_repository: UserRepository,
+    ):
         self.db = db
-        self.security_service = security_service
+        self.password_hasher = password_hasher
+        self.email_encryptor = email_encryptor
+        self.user_repository = user_repository
 
 
-    def confirm_email(self, user_id: int):
-        user_upd_stmt = (
-            update(m.User)
-            .where(m.User.id == user_id)
-            .values(email_confirmed=True)
-            .returning(m.User.id)
-        )
+    @staticmethod
+    def _model_to_scheme(model: m.User, email: str) -> s.User:
+        normalized_email = UserService._normalize_email(email)
+        return s.User(id=model.id, email=normalized_email, banned=model.banned, email_confirmed=model.email_confirmed)
 
-        row = self.db.execute(user_upd_stmt).one_or_none()
+
+    @staticmethod
+    def _normalize_email(email: EmailStr) -> EmailStr:
+        return email.lower()
+
+
+    def confirm_email(self, user_id: int) -> None:
+        user = self.user_repository.confirm_email(user_id)
+        if user is None:
+            raise NotFoundException("User")
         self.db.commit()
-        if not row:
-            raise UserNotFoundException()
 
 
-    def get_by_credentials(self, email: EmailStr, password: str):
-        email_cipher = self.security_service.encrypt_email(email)
+    def get_by_credentials(self, email: EmailStr, password: str) -> s.User:
+        email_cipher = self.email_encryptor.encrypt(email)
 
-        stmt = (
-            select(m.User)
-            .where(
-                m.User.email_cipher == email_cipher,
-            )
-        )
-
-        user: m.User | None = self.db.execute(stmt).scalars().one_or_none()
-        if user is None or not self.security_service.verify_password(password, user.password_hash):
+        user = self.user_repository.get_by_email_cipher(email_cipher)
+        password_hash = user.password_hash if user is not None else self.password_hasher.dummy_hash()
+        password_ok = self.password_hasher.verify(password, password_hash)
+        if user is None or not password_ok:
             raise BadCredentialsException()
-        if user.banned:
-            raise UserBannedException()
-        if settings.EMAIL_CHECK_ENABLED and not user.email_confirmed:
-            raise EmailNotConfirmedException()
 
-        return s.User(id=user.id, email=email, banned=user.banned)
+        return self._model_to_scheme(user, email)
 
 
     def get_by_id(self, user_id: int) -> s.User:
-        stmt = (
-            select(m.User)
-            .where(m.User.id == user_id)
-        )
-        user: m.User | None = self.db.execute(stmt).scalars().one_or_none()
+        user = self.user_repository.get_by_id(user_id)
 
         if user is None:
-            raise UserNotFoundException()
+            raise NotFoundException("User")
 
-        return s.User(
-            id=user.id,
-            email=self.security_service.decrypt_email(user.email_cipher),
-            banned=user.banned,
-        )
+        return self._model_to_scheme(user, self.email_encryptor.decrypt(user.email_cipher))
 
 
-    def create(self, email: EmailStr, password: str):
-        db_user = m.User(
-            email_cipher=self.security_service.encrypt_email(email),
-            role=m.UserRole.USER,
-            password_hash=self.security_service.hash_password(password)
-        )
-        self.db.add(db_user)
-        try:
-            self.db.commit()
-        except IntegrityError as err:
-            self.db.rollback()
-            raise EmailAlreadyBusyException() from err
+    def create(self, email: EmailStr, password: str) -> s.User:
+        email_cipher = self.email_encryptor.encrypt(email)
+        password_hash = self.password_hasher.hash(password)
 
-        self.db.refresh(db_user)
+        user = self.user_repository.add(email_cipher, password_hash)
+        result = self._model_to_scheme(user, email)
+        self.db.commit()
 
-        return s.User(
-            id=db_user.id,
-            email=email,
-            banned=db_user.banned,
-        )
+        return result
