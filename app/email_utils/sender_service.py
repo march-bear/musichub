@@ -11,7 +11,7 @@ from app.settings import SharedSettings
 from app.util.exceptions import EmailSendError
 
 
-class EmailService:
+class SenderService:
     def __init__(
             self,
             renderer: RendererService,
@@ -48,7 +48,7 @@ class EmailService:
             raise EmailSendError() from err
 
 
-    def send_confirm_link(self, email: EmailStr, token: str):
+    async def send_confirm_link(self, email: EmailStr, token: str):
         match self._shared_cfg.API_PUBLIC_PORT:
             case 80:
                 url = f"http://{self._shared_cfg.API_PUBLIC_HOST}/auth/email-confirm/{token}"
@@ -62,5 +62,5 @@ class EmailService:
             {"url": url, "domain": self._shared_cfg.SMTP_HOST_DOMAIN}
         )
 
-        self.send(email, subject, content, html)
+        await self.send(email, subject, content, html)
 
