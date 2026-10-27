@@ -4,7 +4,7 @@ from pathlib import Path
 from app.data.schemas import Project
 from app.services.project_conv_service import ProjectConvService
 from app.services.project_service import ProjectService
-from app.services.storage_service import StorageService
+from app.storage.s3_storage import S3Storage
 
 
 class ProjectSaverService:
@@ -12,11 +12,11 @@ class ProjectSaverService:
             self,
             project_conv_service: ProjectConvService,
             project_service: ProjectService,
-            storage_service: StorageService,
+            project_storage: S3Storage,
     ):
         self.project_conv_service = project_conv_service
         self.project_service = project_service
-        self.storage_service = storage_service
+        self.project_storage = project_storage
 
 
     def save_project(self, user_id: int, project_name: str):
@@ -38,13 +38,13 @@ class ProjectSaverService:
             with open(midi_path, "wb") as f_midi:
                 self.project_conv_service.conv2midi(project, f_midi)
 
-            self.storage_service.save_file(midi_path, str(Path(str(user_id)) / midi_path.name))
+            self.project_storage.put_file(midi_path, str(Path(str(user_id)) / midi_path.name))
 
             self.project_conv_service.conv_midi2wav(midi_path, wav_path)
-            self.storage_service.save_file(wav_path, str(Path(str(user_id)) / wav_path.name))
+            self.project_storage.put_file(wav_path, str(Path(str(user_id)) / wav_path.name))
 
             self.project_conv_service.conv_wav2mp3(wav_path, mp3_path)
-            self.storage_service.save_file(mp3_path, str(Path(str(user_id)) / mp3_path.name))
+            self.project_storage.put_file(mp3_path, str(Path(str(user_id)) / mp3_path.name))
 
             self.project_conv_service.conv_wav2mp3(wav_path, preview_path)
-            self.storage_service.save_file(preview_path, str(Path(str(user_id)) / preview_path.name))
+            self.project_storage.put_file(preview_path, str(Path(str(user_id)) / preview_path.name))

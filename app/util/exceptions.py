@@ -20,3 +20,9 @@ class InvalidConfirmationTokenException(Exception):
 
 class EmailNotConfirmedException(Exception):
     pass
+
+class EmailSendError(Exception):
+    pass
+
+class StorageException(Exception):
+    pass
