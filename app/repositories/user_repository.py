@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-import app.data.models as m
+import app.db.models as m
 from app.util.exceptions import EmailAlreadyBusyException
 
 

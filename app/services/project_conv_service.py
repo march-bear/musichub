@@ -2,7 +2,7 @@ from midi2audio import FluidSynth
 from midiutil import MIDIFile
 from pydub import AudioSegment
 
-from app.data.schemas import Project
+from app.db.schemas import Project
 
 
 class ProjectConvService:

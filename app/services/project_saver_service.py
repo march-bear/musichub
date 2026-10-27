@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from app.data.schemas import Project
+from app.db.schemas import Project
 from app.services.project_conv_service import ProjectConvService
 from app.services.project_service import ProjectService
 from app.storage.s3_storage import S3Storage
