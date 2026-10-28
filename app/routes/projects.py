@@ -5,12 +5,14 @@ from fastapi import APIRouter, Depends
 from fastapi.params import Security
 from starlette import status
 
-from app.data import schemas
-from app.data.models import AudioFormat
-from app.dependencies import get_current_user, get_project_saver_service, get_project_service, get_storage_service
+from app.auth.deps import get_current_user
+from app.db import schemas
+from app.db.models import AudioFormat
+from app.services.deps import get_project_saver_service, get_project_service
 from app.services.project_saver_service import ProjectSaverService
 from app.services.project_service import ProjectService
-from app.services.storage_service import StorageService
+from app.storage.deps import get_projects_storage
+from app.storage.s3_storage import S3Storage
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -40,11 +42,11 @@ def get_project(
 def get_project_preview(
         user: Annotated[schemas.User, Security(get_current_user)],
         name: str,
-        storage_service: Annotated[StorageService, Depends(get_storage_service)]
+        storage_service: Annotated[S3Storage, Depends(get_projects_storage)],
 ):
     return schemas.ProjectURL(
         name=name,
-        url=storage_service.get_file_url(str(Path(str(user.id)) / f"{name}.preview.mp3"))
+        url=storage_service.get_url(str(Path(str(user.id)) / f"{name}.preview.mp3"))
     )
 
 
@@ -53,11 +55,11 @@ def download_project(
         user: Annotated[schemas.User, Security(get_current_user)],
         name: str,
         fmt: AudioFormat,
-        storage_service: Annotated[StorageService, Depends(get_storage_service)]
+        storage_service: Annotated[S3Storage, Depends(get_projects_storage)]
 ):
     return schemas.ProjectURL(
         name=name,
-        url=storage_service.get_file_url(str(Path(str(user.id)) / f"{name}.{fmt.value}"))
+        url=storage_service.get_url(str(Path(str(user.id)) / f"{name}.{fmt.value}"))
     )
 
 
