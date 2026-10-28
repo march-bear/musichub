@@ -16,7 +16,7 @@ def generate_sym_key():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Ожидалось имя входного файла в качестве параметра")
+        print("Ожидалось имя выходного файла в качестве параметра")
         sys.exit(OUTPUT_FILE_NAME_NOT_PROVIDED)
 
     SECRET_DIR.mkdir(parents=True, exist_ok=True)

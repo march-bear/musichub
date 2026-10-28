@@ -4,7 +4,7 @@ from email_utils.email_templates import EmailTemplate
 
 
 class RendererService:
-    def __init__(self, ):
+    def __init__(self):
         self.env = Environment(
             loader=FileSystemLoader("templates"),
             autoescape=select_autoescape(["html", "xml"]),

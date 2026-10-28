@@ -67,6 +67,8 @@ class EmailConfirmation(Base):
     __tablename__ = "email_confirmations"
 
     id: Mapped[IntPk]
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    token_cipher: Mapped[bytes] = mapped_column(unique=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE", name="fk_email_confirm_user")
+    )
+    token_cipher: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[CreatedAt]

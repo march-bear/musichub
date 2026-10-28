@@ -13,10 +13,12 @@ psycopg[binary]
 # util
 pydantic-settings
 alembic
+frozendict
 
-# email
+# email_utils
 itsdangerous
 aiosmtplib
+jinja2
 
 # security
 bcrypt

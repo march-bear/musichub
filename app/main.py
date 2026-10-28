@@ -10,9 +10,9 @@ from app.util.exceptions import (
     EmailAlreadyBusyException,
     EmailNotConfirmedException,
     InvalidConfirmationTokenException,
+    NotFoundException,
     ProjectAlreadyExistsException,
     UserBannedException,
-    NotFoundException,
 )
 
 app = FastAPI()
