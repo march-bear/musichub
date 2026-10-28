@@ -1,24 +1,21 @@
-
-from pydantic import Field, SecretBytes, field_validator
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class SecuritySettings(BaseSettings):
     model_config = SettingsConfigDict(
+        env_prefix="SECURITY__",
         secrets_dir="/run/secrets",
     )
 
-    APP_EMAIL_SECRET_KEY: SecretBytes = Field(validation_alias="email_key")
-    APP_CURRENT_EMAIL_SCHEME: str = "v1"
+    EMAIL_SECRET_KEY: SecretStr
+    CURRENT_EMAIL_SCHEME: str = "v1"
 
-    @field_validator("APP_EMAIL_SECRET_KEY", mode="before")
+    @field_validator("EMAIL_SECRET_KEY", mode="after")
     @classmethod
     def hex_to_bytes(cls, v):
         if isinstance(v, str):
             v = bytes.fromhex(v.strip())
-        if len(v) not in (32,):
-            raise ValueError("email_key: ожидается 32 байта")
+        if len(v) not in (32, 64):
+            raise ValueError("email_secret_key: ожидается 32 или 64 байта")
         return v
-
-
-settings = SecuritySettings()
