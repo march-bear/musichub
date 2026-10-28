@@ -8,6 +8,7 @@ from app.auth.auth_service import AuthService
 from app.auth.confirmation.policy import ConfirmationPolicy, NoConfirmation, RequiredConfirmation
 from app.auth.confirmation.service import EmailConfirmService
 from app.auth.confirmation.tokens import ConfirmTokenRepository
+from app.auth.register_service import RegisterService
 from app.auth.sessions.service import SessionService
 from app.db import schemas
 from app.db.deps import get_db
@@ -72,6 +73,13 @@ def get_auth_service(
         tokens: Annotated[SessionService, Depends(get_session_service)],
 ):
     return AuthService(user_repository, cred_codec, policy, tokens)
+
+
+def get_register_service(
+        user_service: Annotated[UserService, Depends(get_user_service)],
+        confirm_policy: Annotated[ConfirmationPolicy, Depends(get_confirm_policy)],
+):
+    return RegisterService(user_service, confirm_policy)
 
 
 bearer_scheme = HTTPBearer()

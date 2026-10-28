@@ -4,10 +4,10 @@ from email.utils import formatdate, make_msgid
 import aiosmtplib
 from pydantic import EmailStr
 
+from app.common import SharedSettings
 from app.email_utils.email_templates import EmailTemplate
 from app.email_utils.renderer_service import RendererService
 from app.email_utils.settings import SenderSettings
-from app.settings import SharedSettings
 from app.util.exceptions import EmailSendError
 
 

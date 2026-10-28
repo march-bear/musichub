@@ -1,4 +1,4 @@
-from pydantic import SecretStr, field_validator
+from pydantic import SecretBytes, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,7 +8,7 @@ class SecuritySettings(BaseSettings):
         secrets_dir="/run/secrets",
     )
 
-    EMAIL_SECRET_KEY: SecretStr
+    EMAIL_SECRET_KEY: SecretBytes
     CURRENT_EMAIL_SCHEME: str = "v1"
 
     @field_validator("EMAIL_SECRET_KEY", mode="after")

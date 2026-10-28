@@ -1,6 +1,6 @@
 from pydantic import EmailStr
 
-from security.fields.base import DataEncryptor
+from app.security.fields.base import DataEncryptor
 
 
 class EmailEncryptor:

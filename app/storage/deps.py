@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from app.deps import get_app_settings
 from app.settings import AppSettings
-from storage.s3_storage import S3Storage, create_s3_client
+from app.storage.s3_storage import S3Storage, create_s3_client
 
 
 def get_projects_storage(

@@ -1,18 +1,18 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from email_utils.email_templates import EmailTemplate
+from app.email_utils.email_templates import EmailTemplate
 
 
 class RendererService:
     def __init__(self):
         self.env = Environment(
-            loader=FileSystemLoader("templates"),
+            loader=FileSystemLoader("app/email_utils/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
 
         for template in EmailTemplate:
-            self.env.get_template(f"{template.value}.html")
-            self.env.get_template(f"{template.value}.txt")
+            self.env.get_template(f"{template.value["template"]}.html")
+            self.env.get_template(f"{template.value["template"]}.txt")
 
 
     def render(self, template_name: EmailTemplate, context: dict):

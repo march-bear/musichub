@@ -22,7 +22,7 @@ class PasswordHasher:
 
 
     def _detect_scheme(self, hashed: str):
-        if hashed.startswith(()):
+        if hashed.startswith(("$2a$", "$2y$", "$2b$")):
             return self._schemes["bcrypt"]
 
         raise ValueError("Unknown hash format")

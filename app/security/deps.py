@@ -15,8 +15,8 @@ from app.settings import AppSettings
 def get_credentials_codec(
         cfg: Annotated[AppSettings, Depends(get_app_settings)],
 ):
-    password_schemes = {"v1": BCryptPasswordHasherScheme()}
-    password_hasher = PasswordHasher(password_schemes, "v1")
+    password_schemes = {"bcrypt": BCryptPasswordHasherScheme()}
+    password_hasher = PasswordHasher(password_schemes, "bcrypt")
 
     current_scheme = cfg.security.CURRENT_EMAIL_SCHEME
     email_schemes = {current_scheme: StringAesSivScheme(cfg.security.EMAIL_SECRET_KEY)}

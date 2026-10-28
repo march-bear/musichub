@@ -1,11 +1,11 @@
 from pydantic import EmailStr
 
+from app.auth.confirmation.policy import ConfirmationPolicy
 from app.auth.sessions.service import SessionService
 from app.db.schemas import TokenOut
 from app.repositories.user_repository import UserRepository
 from app.security.cred_codec import UserCredentialsCodec
 from app.util.exceptions import BadCredentialsException, EmailNotConfirmedException, UserBannedException
-from app.auth.confirmation.policy import ConfirmationPolicy
 
 
 class AuthService:

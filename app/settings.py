@@ -1,20 +1,8 @@
-
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from auth.settings import AuthSettings
-from email_utils.sender_service import SenderService
-from security.settings import SecuritySettings
-from storage.settings import StorageSettings
-
-
-class SharedSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        secrets_dir="/run/secrets",
-    )
-
-    SOUNDFONT: str
-    DATABASE_URL: str
-    MIGRATIONS_ENABLED: bool = False
+from app.auth.settings import AuthSettings
+from app.common import SharedSettings
+from app.email_utils.settings import SenderSettings
+from app.security.settings import SecuritySettings
+from app.storage.settings import StorageSettings
 
 
 class AppSettings:
@@ -23,4 +11,4 @@ class AppSettings:
         self.security = SecuritySettings()
         self.storage = StorageSettings()
         self.auth = AuthSettings()
-        self.sender = SenderService()
+        self.sender = SenderSettings()

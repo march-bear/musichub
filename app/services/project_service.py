@@ -1,8 +1,8 @@
 from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 
-import app.data.models as m
-import app.data.schemas as s
+import app.db.models as m
+import app.db.schemas as s
 from app.repositories.project_repository import ProjectRepository
 from app.util.exceptions import NotFoundException
 

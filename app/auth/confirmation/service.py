@@ -2,11 +2,11 @@ import secrets
 
 from sqlalchemy.orm import Session
 
+from app.auth.confirmation.tokens import ConfirmTokenRepository
+from app.email_utils.sender_service import SenderService
+from app.security.fields.base import DataEncryptor
 from app.services.user_service import UserService
 from app.util.exceptions import InvalidConfirmationTokenException
-from auth.confirmation.tokens import ConfirmTokenRepository
-from email_utils.sender_service import SenderService
-from security.fields.base import DataEncryptor
 
 
 class EmailConfirmService:

@@ -1,19 +1,11 @@
-from collections.abc import Iterator
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.orm import Session
 
-from app.db.database import SessionLocal
+from app.deps import get_app_settings
 from app.email_utils.renderer_service import RendererService
 from app.email_utils.sender_service import SenderService
 from app.settings import AppSettings
-from deps import get_app_settings
-
-
-def get_db() -> Iterator[Session]:
-    with SessionLocal() as session:
-        yield session
 
 
 def get_renderer_service():
