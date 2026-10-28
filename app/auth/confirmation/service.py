@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.services.user_service import UserService
 from app.util.exceptions import InvalidConfirmationTokenException
-from auth.confirm_tokens import ConfirmTokenRepository
+from auth.confirmation.tokens import ConfirmTokenRepository
 from email_utils.sender_service import SenderService
 from security.fields.base import DataEncryptor
 

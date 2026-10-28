@@ -6,14 +6,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db.models import EmailConfirmation
-from app.security.fields.base import DataEncryptor
 from app.util.exceptions import NotFoundException
 
 
 class ConfirmTokenRepository:
-    def __init__(self, db: Session, encryptor: DataEncryptor):
+    def __init__(self, db: Session):
         self.db = db
-        self.encryptor = encryptor
 
 
     @contextmanager

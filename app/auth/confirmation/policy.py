@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from app.auth.email_confirm import EmailConfirmService
+from app.auth.confirmation.service import EmailConfirmService
 
 
 class ConfirmationPolicy(Protocol):

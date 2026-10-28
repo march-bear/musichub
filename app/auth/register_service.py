@@ -1,7 +1,7 @@
 from pydantic import EmailStr
 
-from app.auth.confirm_policy import ConfirmationPolicy
 from app.services.user_service import UserService
+from app.auth.confirmation.policy import ConfirmationPolicy
 
 
 class RegisterService:
