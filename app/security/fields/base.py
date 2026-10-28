@@ -3,7 +3,6 @@ from typing import Protocol
 
 
 class DataEncryptorScheme(Protocol):
-    version: str
     def encrypt(self, data: str) -> bytes: ...
     def decrypt(self, cipher: bytes) -> str: ...
 
@@ -14,9 +13,9 @@ class DataEncryptor:
         self._current = current
 
 
-    def encrypt(self, password: str) -> str:
+    def encrypt(self, data: str) -> str:
         scheme = self._schemes[self._current]
-        return f"{scheme.version}:{b64encode(self._schemes[self._current].encrypt(password)).decode()}"
+        return f"{self._current}:{b64encode(scheme.encrypt(data)).decode()}"
 
 
     def decrypt(self, cipher: str) -> str:
