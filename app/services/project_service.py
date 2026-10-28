@@ -1,123 +1,80 @@
-from psycopg.errors import UniqueViolation
-from sqlalchemy import Sequence, delete, select, update
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import Sequence
 from sqlalchemy.orm import Session
 
-import app.data.models as m
-import app.data.schemas as s
-from app.util.exceptions import ProjectAlreadyExistsException, ProjectNotFoundException
+import app.db.models as m
+import app.db.schemas as s
+from app.repositories.project_repository import ProjectRepository
+from app.util.exceptions import NotFoundException
 
 
 class ProjectService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, project_repository: ProjectRepository):
         self.db = db
+        self.project_repository = project_repository
+
+
+    @staticmethod
+    def _model_to_scheme(model: m.Project):
+        return s.Project(name=model.name, payload=s.ProjectPayload.model_validate(model.payload))
 
 
     def get(self, user_id: int, project_name: str):
-        stmt = select(m.Project).where(
-            m.Project.user_id == user_id,
-            m.Project.name == project_name,
-        )
-
-        project: m.Project | None = self.db.scalars(stmt).one_or_none()
+        project = self.project_repository.get(user_id, project_name)
 
         if project is None:
-            raise ProjectNotFoundException()
+            raise NotFoundException("Project", f"name={project_name}")
 
-        return s.Project(name=project.name, payload=s.ProjectPayload.model_validate(project.payload))
+        return self._model_to_scheme(project)
 
 
-    def get_all(self, user_id: int):
-        stmt = select(m.Project).where(
-            m.Project.user_id == user_id,
-        )
+    def get_all(self, user_id: int) -> Sequence[s.Project]:
+        projects = self.project_repository.list_by_user(user_id)
 
-        projects: Sequence[m.Project] = self.db.scalars(stmt).all()
-
-        return [
-            s.Project(
-                name=project.name,
-                payload=s.ProjectPayload.model_validate(project.payload)
-            ) for project in projects
-        ]
+        return [self._model_to_scheme(project) for project in projects]
 
 
     def create(self, user_id: int, project_name: str):
         payload = s.ProjectPayload(tempo=120, parts=[])
-        db_project = m.Project(user_id=user_id, name=project_name, payload=payload.model_dump())
-        self.db.add(db_project)
-        try:
-            self.db.commit()
-        except IntegrityError as err:
-            self.db.rollback()
-            orig = err.orig
-            if isinstance(orig, UniqueViolation) and orig.diag.constraint_name == "uq_project_name":
-                raise ProjectAlreadyExistsException() from err
-            raise
+        project = self.project_repository.add(user_id, project_name, payload.model_dump())
 
-        return s.Project(name=db_project.name, payload=payload)
+        result = self._model_to_scheme(project)
+        self.db.commit()
+
+        return result
 
 
     def put(self, user_id: int, project: s.Project) -> s.Project:
-        stmt = (
-            select(m.Project)
-            .where(
-                m.Project.user_id == user_id,
-                m.Project.name == project.name,
-            ).with_for_update()
+        updated = self.project_repository.update_payload(
+            user_id,
+            project.name, project.payload.model_dump(mode="json")
         )
 
-        db_project: m.Project | None = self.db.scalars(stmt).one_or_none()
+        if updated is None:
+            raise NotFoundException("Project", f"name={project.name}")
 
-        if db_project is None:
-            raise ProjectNotFoundException()
-
-        db_project.payload = project.payload.model_dump(mode="json")
         self.db.commit()
 
         return project
 
 
     def patch(self, user_id: int, old_name: str, new_name: str) -> s.Project:
-        stmt = (
-            update(m.Project)
-            .where(
-                m.Project.user_id == user_id,
-                m.Project.name == old_name,
-            )
-            .values(name=new_name)
-            .returning(m.Project.name, m.Project.payload)
-        )
+        updated = self.project_repository.rename(user_id, old_name, new_name)
+        if updated is None:
+            raise NotFoundException("Project", f"name={new_name}")
 
-        try:
-            row = self.db.execute(stmt).one_or_none()
-            self.db.commit()
-            if row is None:
-                self.db.rollback()
-                raise ProjectNotFoundException()
-        except IntegrityError as err:
-            self.db.rollback()
-            orig = err.orig
-            if isinstance(orig, UniqueViolation) and orig.diag.constraint_name == "uq_project_name":
-                raise ProjectAlreadyExistsException() from err
-            raise
-
-        return s.Project(name=row.name, payload=s.ProjectPayload.model_validate(row.payload))
-
-
-    def delete(self, user_id: int, project_name: str) -> s.Project:
-        stmt = (
-            delete(m.Project)
-            .where(
-                m.Project.user_id == user_id,
-                m.Project.name == project_name,
-            )
-            .returning(m.Project.name, m.Project.payload)
-        )
-        row = self.db.execute(stmt).one_or_none()
+        result = self._model_to_scheme(updated)
         self.db.commit()
 
-        if row is None:
-            raise ProjectNotFoundException()
+        return result
 
-        return s.Project(name=row.name, payload=s.ProjectPayload(tempo=120, parts=[]))
+
+    def delete(self, user_id: int, name: str) -> s.Project:
+        deleted = self.project_repository.delete(user_id, name)
+
+        if deleted is None:
+            raise NotFoundException("Project", f"name={name}")
+
+        result = self._model_to_scheme(deleted)
+        self.db.commit()
+
+        return result

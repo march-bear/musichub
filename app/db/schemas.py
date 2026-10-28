@@ -16,6 +16,7 @@ class User(BaseModel):
     id: int
     email: EmailStr
     banned: bool
+    email_confirmed: bool
 
 
 class LoginForm(BaseModel):

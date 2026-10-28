@@ -42,18 +42,20 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[IntPk]
-    email_cipher: Mapped[bytes] = mapped_column(unique=True)
+    email_cipher: Mapped[str]
     role: Mapped[UserRole] = mapped_column(Enum(UserRole))
     banned: Mapped[bool] = mapped_column(default=False)
     password_hash: Mapped[str]
     email_confirmed: Mapped[bool] = mapped_column(default=False)
+
+    __table_args__ = (UniqueConstraint("email_cipher", name="uq_user_email_cipher"),)
 
 
 class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[IntPk]
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", name="fk_project_user"))
     name: Mapped[str] = mapped_column(String(100))
     payload: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[CreatedAt]
@@ -65,6 +67,8 @@ class EmailConfirmation(Base):
     __tablename__ = "email_confirmations"
 
     id: Mapped[IntPk]
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    token_cipher: Mapped[bytes] = mapped_column(unique=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE", name="fk_email_confirm_user")
+    )
+    token_cipher: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[CreatedAt]

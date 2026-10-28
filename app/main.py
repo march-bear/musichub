@@ -10,23 +10,21 @@ from app.util.exceptions import (
     EmailAlreadyBusyException,
     EmailNotConfirmedException,
     InvalidConfirmationTokenException,
+    NotFoundException,
     ProjectAlreadyExistsException,
-    ProjectNotFoundException,
     UserBannedException,
-    UserNotFoundException,
 )
 
 app = FastAPI()
 app.include_router(projects.router)
 app.include_router(auth.router)
 
-@app.exception_handler(UserNotFoundException)
-def handle_user_not_found_exception(request: Request, exc: UserNotFoundException):
-    return JSONResponse(status_code=404, content={"detail": "User not found"})
-
-@app.exception_handler(ProjectNotFoundException)
-def handle_project_not_found_exception(request: Request, exc: ProjectNotFoundException):
-    return JSONResponse(status_code=404, content={"detail": "Project not found"})
+@app.exception_handler(NotFoundException)
+def handle_user_not_found_exception(request: Request, exc: NotFoundException):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": f"{exc.entity} not found{f": {exc.details}" if exc.details else ""}"}
+    )
 
 @app.exception_handler(ProjectAlreadyExistsException)
 def handle_project_already_exists_exception(request: Request, exc: ProjectAlreadyExistsException):
